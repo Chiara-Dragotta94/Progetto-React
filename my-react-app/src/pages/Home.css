@@ -1,0 +1,300 @@
+.home {
+  width: 100%;
+}
+
+/* Animazioni fade-in */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.8s ease-out;
+}
+
+.hero-section {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: linear-gradient(135deg, #4a7c59 0%, #3a6b4a 100%);
+  color: var(--white);
+  margin-bottom: 3rem;
+}
+
+.hero-section h1 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+  font-family: var(--font-logo);
+}
+
+.hero-section p {
+  font-family: var(--font-body);
+}
+
+.hero-section p {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  opacity: 0.95;
+}
+
+.hero-cta {
+  margin-top: 1rem;
+}
+
+/* Sezione ricette popolari */
+.section-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.section-subtitle {
+  color: #666;
+  font-size: 1.1rem;
+  margin-top: 0.5rem;
+}
+
+.popular-recipes-section {
+  max-width: 1400px;
+  margin: 0 auto 4rem;
+  padding: 3rem;
+  background: #f5f9f5;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(44, 110, 64, 0.06);
+}
+
+.popular-recipes-section h2 {
+  color: #4a7c59;
+  font-size: 2.5rem;
+  margin-bottom: 0;
+  font-family: var(--font-body);
+  font-weight: 700;
+}
+
+.popular-recipes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2.5rem;
+  margin-bottom: 3rem;
+}
+
+.cta-button {
+  display: inline-block;
+  padding: 1rem 2rem;
+  background-color: #4a7c59;
+  color: var(--white);
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  text-align: center;
+  box-shadow: 0 3px 10px rgba(74, 124, 89, 0.25);
+}
+
+.cta-button:hover {
+  background-color: #3a6b4a;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(74, 124, 89, 0.35);
+}
+
+.popular-recipes-footer {
+  text-align: center;
+  margin-top: 3rem;
+}
+
+.popular-recipes-footer .cta-button {
+  display: inline-block;
+  max-width: 300px;
+  margin-bottom: 1rem;
+}
+
+.recipes-count {
+  color: #666;
+  font-size: 0.95rem;
+  margin-top: 1rem;
+}
+
+.cta-section {
+  text-align: center;
+  padding: 3rem 2rem;
+  background: #f0f7f1;
+  margin: 3rem auto;
+  max-width: 1200px;
+  border-radius: 20px;
+  box-shadow: 0 3px 15px rgba(44, 110, 64, 0.08);
+}
+
+.cta-section h2 {
+  color: #4a7c59;
+  margin-bottom: 1rem;
+  font-family: var(--font-body);
+  font-size: 2.2rem;
+  font-weight: 700;
+}
+
+.cta-section p {
+  margin-bottom: 1.5rem;
+  color: #666;
+}
+
+/* Sezione articolo Veganuary */
+.veganuary-article-section {
+  max-width: 1400px;
+  margin: 0 auto 4rem;
+  padding: 3rem 2rem;
+  background: #f8f6f2;
+  border-radius: 20px;
+}
+
+.veganuary-article-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  transition: transform 0.2s ease;
+}
+
+.veganuary-article-link:hover {
+  transform: translateY(-5px);
+}
+
+.veganuary-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  background: transparent;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.veganuary-image {
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+  overflow: hidden;
+}
+
+.veganuary-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.veganuary-container:hover .veganuary-image img {
+  transform: scale(1.05);
+}
+
+.veganuary-content {
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.veganuary-content h2 {
+  color: #4a7c59;
+  margin-bottom: 1.5rem;
+  font-size: 2.5rem;
+  font-family: var(--font-body);
+  font-weight: 700;
+}
+
+.veganuary-content p {
+  font-family: var(--font-body);
+}
+
+.veganuary-content p {
+  line-height: 1.8;
+  margin-bottom: 1.5rem;
+  color: #555;
+  font-size: 1.05rem;
+}
+
+.veganuary-link {
+  display: inline-block;
+  padding: 0.9rem 1.8rem;
+  background: #4a7c59;
+  color: var(--white);
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  margin-top: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 12px rgba(74, 124, 89, 0.25);
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
+.veganuary-link:hover {
+  background: #3a6b4a;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 18px rgba(74, 124, 89, 0.35);
+}
+
+@media (max-width: 1400px) {
+  .popular-recipes-section {
+    max-width: 1200px;
+    padding: 0 2rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  .veganuary-container {
+    grid-template-columns: 1fr;
+  }
+
+  .veganuary-image {
+    min-height: 300px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-section h1 {
+    font-size: 2rem;
+  }
+
+  .popular-recipes-section {
+    padding: 0 1.5rem;
+  }
+
+  .popular-recipes-section h2 {
+    font-size: 1.5rem;
+    margin-bottom: 0;
+  }
+
+  .section-subtitle {
+    font-size: 1rem;
+  }
+
+  .popular-recipes-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .popular-recipes-section {
+    padding: 2rem 1.5rem;
+  }
+
+  .veganuary-content {
+    padding: 2rem;
+  }
+
+  .veganuary-content h2 {
+    font-size: 1.5rem;
+  }
+
+  .veganuary-links {
+    flex-direction: column;
+  }
+}
+

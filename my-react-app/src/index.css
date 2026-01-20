@@ -1,0 +1,35 @@
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --primary-color: #2C6E40;
+  --secondary-color: #2C6E40;
+  --accent-color: #2C6E40;
+  --text-color: #333;
+  --bg-color: #F7F4EF;
+  --white: #ffffff;
+  --beige-light: #F7F4EF;
+  --green-dark: #2C6E40;
+  --font-logo: 'Dancing Script', cursive;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #F7F4EF;
+  color: var(--text-color);
+  line-height: 1.6;
+}
+
+#root {
+  min-height: 100vh;
+}
