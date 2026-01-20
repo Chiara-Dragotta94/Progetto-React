@@ -273,7 +273,8 @@ export async function getAllRecipes(): Promise<Recipe[]> {
         }
       }
       
-      // Rimuovi duplicati
+      // Rimuovi duplicati (le ricette possono essere duplicate tra le diverse query)
+      // Il numero finale dipende da quante ricette uniche vengono restituite dalle API
       const uniqueRecipes = allRecipes.filter((recipe, index, self) =>
         index === self.findIndex(r => r.id === recipe.id)
       );
