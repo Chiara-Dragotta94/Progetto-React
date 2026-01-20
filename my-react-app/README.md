@@ -69,6 +69,24 @@ Un'applicazione web moderna sviluppata con React e TypeScript per scoprire, crea
 
 6. Apri il browser su `http://localhost:5173` (o la porta indicata nel terminale)
 
+## Pubblicazione su GitHub Pages
+
+Per pubblicare l'app su GitHub Pages:
+
+1. Assicurati di aver installato le dipendenze (`npm install`)
+2. Esegui il deploy:
+   ```bash
+   npm run deploy
+   ```
+3. Vai su GitHub → Settings → Pages e seleziona il branch `gh-pages` come sorgente
+
+**Nota importante**: Se il tuo repository NON è nella root (es. `username.github.io/repository-name`), devi aggiornare il `base` in `vite.config.ts` con il nome del tuo repository:
+```typescript
+base: '/repository-name/',
+```
+
+Per maggiori dettagli, consulta il file `DEPLOY.md`.
+
 ## Uso
 
 ### Comandi Disponibili

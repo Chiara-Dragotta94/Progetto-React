@@ -4,11 +4,25 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Leafy - Scopri migliaia di ricette vegetariane e vegane. Ispirato da Veganuary per un'alimentazione sana e sostenibile." />
+    <meta name="description" content="Leafy - Scopri migliaia di ricette vegetariane e vegane. Piattaforma completa per scoprire, creare e gestire ricette vegetariane e vegane." />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap" rel="stylesheet">
     <title>Leafy - Ricette Vegetariane e Vegane</title>
+    <script type="text/javascript">
+      // Single Page Apps for GitHub Pages
+      var pathSegmentsToKeep = 0;
+      var l = window.location;
+      if (l.pathname.slice(1).split('/').length > pathSegmentsToKeep && l.search.indexOf('?/') === -1) {
+        l.replace(
+          l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+          l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
+          l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
+          (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+          l.hash
+        );
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
