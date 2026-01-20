@@ -2,16 +2,10 @@
 
 ## Prerequisiti
 
-1. Installa `gh-pages` come dipendenza di sviluppo:
-   ```bash
-   npm install --save-dev gh-pages
-   ```
-
-2. Assicurati che il tuo repository GitHub sia configurato correttamente.
+1. `gh-pages` è già installato come dipendenza di sviluppo
+2. Assicurati che il tuo repository GitHub sia configurato correttamente
 
 ## Passaggi per il Deploy
-
-### Opzione 1: Usando lo script npm (Consigliato)
 
 1. Esegui il comando:
    ```bash
@@ -22,16 +16,7 @@
    - Esegue il build dell'app (`npm run build`)
    - Pubblica la cartella `dist` sul branch `gh-pages` del tuo repository
 
-3. Vai su GitHub → Settings → Pages e seleziona il branch `gh-pages` come sorgente.
-
-### Opzione 2: Deploy Manuale
-
-1. Esegui il build:
-   ```bash
-   npm run build
-   ```
-
-2. Copia il contenuto della cartella `dist` nel branch `gh-pages` del tuo repository.
+3. Vai su GitHub → Settings → Pages e seleziona il branch `gh-pages` come sorgente
 
 ## Configurazione GitHub Pages
 
@@ -43,6 +28,8 @@
 
 ## Nota Importante
 
+L'app usa **HashRouter** invece di BrowserRouter per compatibilità con GitHub Pages. Gli URL avranno un hash (es. `/#/recipes` invece di `/recipes`), ma questo garantisce che il routing funzioni correttamente su GitHub Pages.
+
 Se il tuo repository NON è nella root di GitHub (es. `username.github.io/repository-name`), devi aggiornare `vite.config.ts`:
 
 ```typescript
@@ -53,6 +40,6 @@ Sostituisci `repository-name` con il nome effettivo del tuo repository.
 
 ## Risoluzione Problemi
 
-- **404 Error**: Assicurati che il file `404.html` sia nella cartella `public` e che `.nojekyll` sia presente
-- **Routing non funziona**: Verifica che il file `404.html` sia stato copiato nella cartella `dist` dopo il build
+- **404 Error**: Verifica che il branch `gh-pages` contenga i file dalla cartella `dist`
+- **Routing non funziona**: L'app usa HashRouter, quindi gli URL avranno `#` (es. `/#/recipes`)
 - **Risorse non caricate**: Controlla che il `base` in `vite.config.ts` corrisponda al percorso del tuo repository
