@@ -1,19 +1,27 @@
+// Componente RecipeDetail: pagina di dettaglio di una singola ricetta
+// Mostra tutte le informazioni complete: immagine, metadati, descrizione,
+// ingredienti e istruzioni passo-passo.
+// Gestisce sia ricette delle API che ricette create dall'utente.
+
 import { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useRecipe } from '../context/RecipeContext';
 import './RecipeDetail.css';
 
 export default function RecipeDetail() {
+  // Estraggo l'ID della ricetta dall'URL (parametro dinamico :id)
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { currentRecipe, loading, error, getRecipeById } = useRecipe();
 
+  // Al montaggio del componente, carico i dettagli della ricetta tramite l'ID
   useEffect(() => {
     if (id) {
       getRecipeById(parseInt(id));
     }
   }, [id, getRecipeById]);
 
+  // Mostro un messaggio di caricamento mentre attendo i dati
   if (loading) {
     return (
       <div className="recipe-detail-loading">
@@ -22,6 +30,7 @@ export default function RecipeDetail() {
     );
   }
 
+  // Mostro un messaggio di errore con bottone per tornare indietro
   if (error || !currentRecipe) {
     return (
       <div className="recipe-detail-error">
@@ -33,10 +42,11 @@ export default function RecipeDetail() {
     );
   }
 
-  // Processa le istruzioni: prima prova analyzedInstructions, poi instructions
+  // Processo le istruzioni della ricetta
+  // Le istruzioni possono arrivare in due formati diversi dalle API:
   let instructions: string[] = [];
   
-  // PRIORITÀ 1: analyzedInstructions (formato strutturato da Spoonacular)
+  // FORMATO 1: analyzedInstructions (Spoonacular) - struttura con array di step numerati
   if (currentRecipe.analyzedInstructions && currentRecipe.analyzedInstructions.length > 0) {
     const firstInstructionSet = currentRecipe.analyzedInstructions[0];
     if (firstInstructionSet.steps && Array.isArray(firstInstructionSet.steps)) {
@@ -52,17 +62,17 @@ export default function RecipeDetail() {
     }
   }
   
-  // PRIORITÀ 2: instructions (stringa semplice)
+  // FORMATO 2: instructions (stringa semplice) - usato da TheMealDB e ricette utente
   if (instructions.length === 0 && currentRecipe.instructions) {
     const instructionsStr = currentRecipe.instructions.trim();
     if (instructionsStr) {
-      // Splitta per newline, rimuovi righe vuote, e pulisci
+      // Divido per riga, rimuovo righe vuote e pulisco la numerazione eventuale
       instructions = instructionsStr
         .split(/\r?\n/)
         .map(line => line.trim())
         .filter(line => line.length > 0)
         .map(line => {
-          // Rimuovi numeri all'inizio se presenti (es. "1. passo" -> "passo")
+          // Rimuovo numeri iniziali tipo "1. " o "1) " se presenti
           return line.replace(/^\d+[\.\)]\s*/, '').trim();
         });
     }
@@ -70,10 +80,12 @@ export default function RecipeDetail() {
 
   return (
     <div className="recipe-detail">
+      {/* Bottone per tornare alla lista delle ricette */}
       <button onClick={() => navigate('/recipes')} className="back-button">
         ← Torna alle ricette
       </button>
 
+      {/* Intestazione: immagine grande e metadati principali */}
       <div className="recipe-detail-header">
         <img 
           src={currentRecipe.image || '/placeholder-recipe.jpg'} 
@@ -96,6 +108,7 @@ export default function RecipeDetail() {
         </div>
       </div>
 
+      {/* Sezione descrizione: rimuovo eventuali tag HTML residui */}
       {currentRecipe.summary && (
         <div className="recipe-detail-section">
           <h2>Descrizione</h2>
@@ -103,6 +116,7 @@ export default function RecipeDetail() {
         </div>
       )}
 
+      {/* Sezione ingredienti: lista con nome, quantita' e unita' di misura */}
       {currentRecipe.extendedIngredients && currentRecipe.extendedIngredients.length > 0 && (
         <div className="recipe-detail-section">
           <h2>Ingredienti</h2>
@@ -119,12 +133,14 @@ export default function RecipeDetail() {
         </div>
       )}
 
+      {/* Sezione istruzioni: lista ordinata dei passaggi */}
       {instructions.length > 0 && (
         <div className="recipe-detail-section">
           <h2>Istruzioni</h2>
           <ol className="instructions-list">
             {instructions.map((step: string, index: number) => (
               <li key={index}>
+                {/* Rimuovo eventuali numeri duplicati all'inizio del passaggio */}
                 {step.replace(/^\d+\.\s*/, '')}
               </li>
             ))}

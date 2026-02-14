@@ -1,47 +1,46 @@
+// Servizio API principale per il recupero delle ricette
+// Ho implementato un sistema di fallback a 3 livelli per garantire
+// che l'app funzioni sempre, anche senza connessione o API key:
+// 1. Spoonacular API (richiede API key, dati ricchi e dettagliati)
+// 2. TheMealDB API (completamente gratuita, nessuna chiave necessaria)
+// 3. Mock Data (dati statici di esempio, sempre disponibili offline)
+
 import axios from 'axios';
 import type { Recipe } from '../types/recipe';
 import { searchTheMealDB, getTheMealDBRecipeById, getAllTheMealDBRecipes } from './theMealDB';
 import { mockRecipes, getMockRecipeById } from './mockData';
 
+// URL base dell'API Spoonacular per le ricette
 const SPOONACULAR_BASE_URL = 'https://api.spoonacular.com/recipes';
 
-/**
- * Sistema di fallback per le API:
- * 1. Spoonacular API (se configurata con API key)
- * 2. TheMealDB API (completamente gratuita)
- * 3. Mock Data (dati di esempio)
- */
-
-// Controlla se esiste una API key valida di Spoonacular nel file .env
+// Verifico se esiste una API key valida di Spoonacular nel file .env
+// Se la chiave non e' configurata o e' il placeholder, uso direttamente i fallback
 const USE_SPOONACULAR = import.meta.env.VITE_SPOONACULAR_API_KEY && 
                         import.meta.env.VITE_SPOONACULAR_API_KEY !== 'YOUR_API_KEY_HERE';
 
-/**
- * Crea un'istanza di axios configurata per Spoonacular
- * - Base URL predefinita
- * - API key come parametro di default per tutte le richieste
- */
+// Creo un client Axios preconfigurato per Spoonacular
+// Questo mi evita di ripetere la configurazione in ogni chiamata API
 function createSpoonacularClient() {
   const API_KEY = import.meta.env.VITE_SPOONACULAR_API_KEY;
   
   return axios.create({
     baseURL: SPOONACULAR_BASE_URL,
     params: {
-      apiKey: API_KEY, // API key inclusa automaticamente in ogni richiesta
+      apiKey: API_KEY, // La chiave viene aggiunta automaticamente a ogni richiesta
     },
-    timeout: 10000,
+    timeout: 10000, // Timeout di 10 secondi per evitare attese troppo lunghe
   });
 }
 
-/**
- * Formatta una ricetta da Spoonacular nel formato standard dell'app
- */
+// Converte una ricetta dal formato Spoonacular al formato standard dell'app
+// Spoonacular restituisce HTML nel summary e nelle istruzioni,
+// quindi uso una regex per rimuovere tutti i tag HTML
 function formatSpoonacularRecipe(recipe: any): Recipe {
   return {
     id: recipe.id,
     title: recipe.title,
     image: recipe.image,
-    summary: recipe.summary?.replace(/<[^>]*>/g, '') || '',
+    summary: recipe.summary?.replace(/<[^>]*>/g, '') || '',       // Rimuovo tag HTML dal sommario
     readyInMinutes: recipe.readyInMinutes,
     servings: recipe.servings,
     healthScore: recipe.healthScore,
@@ -52,7 +51,7 @@ function formatSpoonacularRecipe(recipe: any): Recipe {
       unit: ing.unit,
       original: ing.original,
     })),
-    instructions: recipe.instructions?.replace(/<[^>]*>/g, '') || '',
+    instructions: recipe.instructions?.replace(/<[^>]*>/g, '') || '', // Rimuovo tag HTML dalle istruzioni
     analyzedInstructions: recipe.analyzedInstructions,
     sourceUrl: recipe.sourceUrl,
     sourceName: recipe.sourceName,
@@ -63,28 +62,28 @@ function formatSpoonacularRecipe(recipe: any): Recipe {
   };
 }
 
-/**
- * Cerca ricette vegetariane usando il sistema di fallback
- */
+// Cerca ricette vegetariane usando il sistema di fallback a 3 livelli
+// Questa funzione viene chiamata dalla SearchBar nella homepage
 export async function searchRecipes(query: string): Promise<Recipe[]> {
+  // Validazione: se la query e' vuota, restituisco un array vuoto
   if (!query || !query.trim()) {
     return [];
   }
 
   const allResults: Recipe[] = [];
   
-  // PRIORITÀ 1: Spoonacular API (se configurato con API key)
+  // LIVELLO 1: Provo con Spoonacular (se la chiave API e' configurata)
   if (USE_SPOONACULAR) {
     try {
       const client = createSpoonacularClient();
       
-      // Ricerca principale con la query
+      // Ricerca principale: cerco ricette vegetariane che corrispondono alla query
       const response = await client.get('/complexSearch', {
         params: {
           query: query.trim(),
           diet: 'vegetarian',
-          number: 100, // Massimo permesso da Spoonacular
-          addRecipeInformation: true,
+          number: 100,                // Richiedo fino a 100 risultati (massimo di Spoonacular)
+          addRecipeInformation: true,  // Includo i dettagli completi della ricetta
         },
       });
       
@@ -93,7 +92,7 @@ export async function searchRecipes(query: string): Promise<Recipe[]> {
         allResults.push(...recipes);
       }
       
-      // Se non abbiamo abbastanza risultati, cerca anche senza query specifica
+      // Se ho pochi risultati, integro con ricette popolari generiche
       if (allResults.length < 20) {
         try {
           const popularResponse = await client.get('/complexSearch', {
@@ -110,16 +109,16 @@ export async function searchRecipes(query: string): Promise<Recipe[]> {
             allResults.push(...popularRecipes);
           }
         } catch (e) {
-          // Ignora errori secondari
+          // Ignoro errori su questa richiesta secondaria, non e' critica
         }
       }
       
-      // Rimuovi duplicati e filtra per query se necessario
+      // Rimuovo eventuali ricette duplicate (stesso ID)
       const uniqueRecipes = allResults.filter((recipe, index, self) =>
         index === self.findIndex(r => r.id === recipe.id)
       );
       
-      // Filtra per query se abbiamo molti risultati
+      // Filtro ulteriormente per pertinenza alla query
       if (uniqueRecipes.length > 0) {
         const queryLower = query.toLowerCase();
         const filtered = uniqueRecipes.filter(recipe =>
@@ -127,30 +126,32 @@ export async function searchRecipes(query: string): Promise<Recipe[]> {
           (recipe.summary && recipe.summary.toLowerCase().includes(queryLower))
         );
         
-        // Se il filtro ha risultati, restituiscili, altrimenti restituisci tutti
+        // Se il filtro ha risultati li restituisco, altrimenti restituisco tutti (max 100)
         return filtered.length > 0 ? filtered : uniqueRecipes.slice(0, 100);
       }
     } catch (error: any) {
-      // Se l'errore è per API key non valida, passa al fallback
+      // Gestisco errori di autenticazione separatamente dagli altri errori
       if (error.response?.status === 401 || error.response?.status === 403) {
         console.error('API Key non valida. Controlla la configurazione nel file .env');
       } else {
         console.error('Error searching recipes:', error);
       }
+      // Non faccio throw: passo al livello di fallback successivo
     }
   }
   
-  // PRIORITÀ 2: TheMealDB
+  // LIVELLO 2: Provo con TheMealDB (gratuita, nessuna chiave necessaria)
   try {
     const recipes = await searchTheMealDB(query);
     if (recipes.length > 0) {
       return recipes;
     }
   } catch (error) {
-    // Ignora errori CORS
+    // Ignoro errori CORS che possono verificarsi con TheMealDB
   }
   
-  // PRIORITÀ 3: Mock Data
+  // LIVELLO 3: Uso i dati mock come ultimo fallback
+  // Filtro i mock data in base alla query dell'utente
   const filteredMock = mockRecipes.filter(recipe =>
     recipe.title.toLowerCase().includes(query.toLowerCase())
   );
@@ -158,14 +159,12 @@ export async function searchRecipes(query: string): Promise<Recipe[]> {
   return filteredMock;
 }
 
-/**
- * Ottiene i dettagli di una ricetta specifica
- */
+// Recupera i dettagli di una singola ricetta dato il suo ID
+// Provo entrambe le API in parallelo per maggiore velocita'
 export async function getRecipeById(id: number): Promise<Recipe | null> {
-  // Prova entrambe le API in parallelo per maggiore efficienza
   const promises: Promise<Recipe | null>[] = [];
   
-  // PRIORITÀ 1: Spoonacular API
+  // LIVELLO 1: Spoonacular - recupero i dettagli completi della ricetta
   if (USE_SPOONACULAR) {
     promises.push(
       (async () => {
@@ -173,7 +172,7 @@ export async function getRecipeById(id: number): Promise<Recipe | null> {
           const client = createSpoonacularClient();
           const response = await client.get(`/${id}/information`, {
             params: {
-              includeNutrition: false,
+              includeNutrition: false, // Non mi servono i dati nutrizionali
             },
           });
           return formatSpoonacularRecipe(response.data);
@@ -181,51 +180,48 @@ export async function getRecipeById(id: number): Promise<Recipe | null> {
           if (error.response?.status === 401 || error.response?.status === 403) {
             throw new Error('API Key non valida. Controlla la configurazione nel file .env');
           }
-          // Se è un 404 o altro errore, ritorna null per provare altre API
           return null;
         }
       })()
     );
   }
   
-  // PRIORITÀ 2: TheMealDB (solo se non ci sono problemi CORS)
+  // LIVELLO 2: TheMealDB - provo in parallelo con Spoonacular
   promises.push(
     (async () => {
       try {
         return await getTheMealDBRecipeById(id);
       } catch (error) {
-        // Non loggare errori CORS, sono gestiti internamente
         return null;
       }
     })()
   );
   
-  // Attendi che almeno una delle API risponda
+  // Attendo tutte le risposte e prendo la prima ricetta trovata
+  // Uso Promise.allSettled per non fallire se una delle API non risponde
   const results = await Promise.allSettled(promises);
   
-  // Restituisci la prima ricetta trovata
   for (const result of results) {
     if (result.status === 'fulfilled' && result.value) {
       return result.value;
     }
   }
   
-  // PRIORITÀ 3: Mock Data
+  // LIVELLO 3: Cerco nei dati mock come ultimo tentativo
   return getMockRecipeById(id);
 }
 
-/**
- * Ottiene tutte le ricette disponibili
- */
+// Carica tutte le ricette vegetariane disponibili
+// Questa funzione viene chiamata al caricamento della pagina "Tutte le ricette"
 export async function getAllRecipes(): Promise<Recipe[]> {
   const allRecipes: Recipe[] = [];
   
-  // PRIORITÀ 1: Spoonacular API
+  // LIVELLO 1: Spoonacular - carico ricette popolari + ricette per categoria
   if (USE_SPOONACULAR) {
     try {
       const client = createSpoonacularClient();
       
-      // Prima prova una richiesta semplice per vedere se funziona
+      // Prima richiesta: 100 ricette vegetariane ordinate per popolarita'
       const simpleRequest = await client.get('/complexSearch', {
         params: {
           diet: 'vegetarian',
@@ -240,14 +236,14 @@ export async function getAllRecipes(): Promise<Recipe[]> {
         allRecipes.push(...recipes);
       }
       
-      // Se abbiamo risultati, prova a ottenere di più con query specifiche
+      // Se ho ricette, provo ad arricchire con query specifiche per categoria
       if (allRecipes.length > 0) {
         const specificQueries = [
           'pasta', 'salad', 'rice', 'quinoa', 'tofu', 'vegetable', 
           'soup', 'curry', 'burger', 'pizza', 'lasagna', 'risotto'
         ];
         
-        // Limita a 5 query per non fare troppe richieste
+        // Limito a 5 query per non consumare troppi crediti API
         for (const query of specificQueries.slice(0, 5)) {
           try {
             const response = await client.get('/complexSearch', {
@@ -264,17 +260,17 @@ export async function getAllRecipes(): Promise<Recipe[]> {
               allRecipes.push(...recipes);
             }
             
-            // Piccola pausa tra le richieste
+            // Pausa di 300ms tra le richieste per non sovraccaricare l'API
             await new Promise(resolve => setTimeout(resolve, 300));
           } catch (e) {
-            // Continua con la prossima query se questa fallisce
+            // Se una query fallisce, continuo con la successiva
             continue;
           }
         }
       }
       
-      // Rimuovi duplicati (le ricette possono essere duplicate tra le diverse query)
-      // Il numero finale dipende da quante ricette uniche vengono restituite dalle API
+      // Rimuovo i duplicati: le stesse ricette possono apparire in query diverse
+      // Il numero finale di ricette dipende da quante sono uniche tra tutte le risposte
       const uniqueRecipes = allRecipes.filter((recipe, index, self) =>
         index === self.findIndex(r => r.id === recipe.id)
       );
@@ -291,16 +287,16 @@ export async function getAllRecipes(): Promise<Recipe[]> {
     }
   }
   
-  // PRIORITÀ 2: TheMealDB
+  // LIVELLO 2: TheMealDB - carico ricette da categorie vegetariane
   try {
     const mealDBRecipes = await getAllTheMealDBRecipes();
     if (mealDBRecipes.length > 0) {
       return mealDBRecipes;
     }
   } catch (error) {
-    // Ignora errori CORS
+    // Ignoro errori CORS
   }
   
-  // PRIORITÀ 3: Mock Data (sempre disponibile)
-      return mockRecipes;
+  // LIVELLO 3: Mock Data - restituisco sempre i dati di esempio come ultimo fallback
+  return mockRecipes;
 }

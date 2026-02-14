@@ -1,3 +1,9 @@
+// Dati mock (di esempio) per le ricette
+// Questi dati servono come terzo e ultimo livello di fallback:
+// vengono usati quando ne' Spoonacular ne' TheMealDB sono disponibili.
+// Garantiscono che l'app funzioni sempre, anche completamente offline.
+// Ho inserito 10 ricette italiane vegetariane con dati realistici.
+
 import type { Recipe } from '../types/recipe';
 
 export const mockRecipes: Recipe[] = [
@@ -178,6 +184,8 @@ export const mockRecipes: Recipe[] = [
   },
 ];
 
+// Funzione per trovare una ricetta mock dato il suo ID
+// Restituisce null se la ricetta non esiste nei dati mock
 export function getMockRecipeById(id: number): Recipe | null {
   return mockRecipes.find(r => r.id === id) || null;
 }
